@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+
+# macOS ONLY
+
+# People need to have installed Anaconda for this to work. Presumably that can be done easily enough. Alt: execute another script first.
+
+import re, os, ftplib, subprocess, glob, sys, shutil
+
+# This gives the script some self awareness. It finds itself and changes the working directory to that path (temporarily).
+# This is important for executing the brew_installer.sh script.
+script_path = os.path.dirname(os.path.realpath(__file__))
+os.chdir(script_path)
+
+# This will check to see if several important system programs are installed in hierarchical order
+# If they are not, then it executes a script to install them, may require user password.
+if not shutil.which('xcode-select'):
+    if not shutil.which('brew'):
+        if not shutil.which('kallisto'):
+            subprocess.call(['./brew_installer.sh'])
+
+from termcolor import colored, cprint
+import Bio
+
+fastq_dir = input("Enter the directory of your FASTQ files (drag and drop is fine): ")
+fastq_dir = fastq_dir.strip()
+try:
+    os.chdir(fastq_dir)
+except FileNotFoundError:
+    text = colored("Looks like that directory does not exist - restart the script and try dragging and dropping the folder directly into Terminal.", "red")
+    print(text)
+    sys.exit(1)
+except PermissionError:
+    print(text)
+    sys.exit(1)
+
+# Define some potentially useful variables that I can plug into subprocess.
+kallisto = '/Users/molliesweeney/Downloads/kallisto-0.48.0/kallisto/build/src/kallisto'
+index = 'index'
+quant = 'quant'
+
+# Fetch the index file (name independent, it just needs to end in the pattern defined above)
+# All Ensembl cDNA files should have that precise formatting.
+
+pattern = '*.cdna.all.fa.gz'
+ref_cdna = 'ref_cdna.fa.gz'
+exts = ('*.fastq.gz', '*.fq.gz')
+
+ref_cdna = glob.glob(pattern)
+ref_cdna = ref_cdna[0]
+
+# The rest of this is somewhat specific to paired-end sequencing... I could go back and redo for single-end? Probably wrap in 'if', 'try' statements.
+# Find the first of the pair of FASTQ files in the directory.
+fastqs = glob.glob("*_1.fastq.gz")
+SER = glob.glob("*.f*q.gz")
+
+# This checks whether you already have an index and, if so, whether you want to build a new one.
+index_checker = os.path.isfile('kallisto_index')
+
+if index_checker:
+    indexed = input(colored("Would you like to build a fresh transcriptome index? This is optional [Y/N] ", 'green'))
+    if indexed == "Y":
+        subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
+    else:
+        pass
+else:
+    subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
+
+while True:
+    valid = ('pe', 'se')
+    read_type = input(colored("Are your reads paired-end [PE] or single-end [SE]? Paired-end reads have two files for each condition - one with '_1' and one with '_2' [PE/SE] ", "yellow"))
+    if read_type.lower() not in valid:
+        text = colored("Looks like you had a typo in the last prompt!", "red")
+        print(text)
+        continue
+    else:
+        break
+
+cnt = 0
+# This script runs for PE reads - it can estimate fragment length from this and doesn't need you to provide the information.
+
+if 'PE' in read_type:
+    try:
+        for forward in fastqs:
+            reverse = forward.replace("_1.fastq.gz", "_2.fastq.gz")
+            dir = forward.replace("_1.fastq.gz", "")
+            subprocess.call([kallisto, quant,
+            '-i', 'kallisto_index',
+            '-o', dir + '_quant',
+            '--bias',
+            '-b', '200',
+            '-t', '4',
+            forward, reverse])
+            cnt += 1
+            print(cnt)
+    except:
+        text = colored("Looks like something went wrong.", "red")
+        print(text)
+        sys.exit(1)
+else:
+    pass
+
+# This needs a little bit more user-engagement - average fragment length and the SD are required, but can be substituted by guesses if it is not known (it rarely is).
+
+if 'SE' in read_type:
+    frag_len = 250
+    standard_dev = 35
+    frags = input("If known, input estimated average fragment length. If not known, hit enter: ")
+    if not frags:
+        frags = frag_len
+    sd = input("If known, input the standard deviation of the fragment length. If not known, hit enter: ")
+    if not standard_dev:
+        sd = standard_dev
+    try:
+        for read in SER:
+            dir = read.replace(".f*q.gz", "")
+            subprocess.call([kallisto, quant,
+            '-i', 'kallisto_index',
+            '-o', dir + '_quant',
+            '--bias',
+            '-b', '200',
+            '-t', '4',
+            '--single',
+            '-l', frags,
+            '-s', sd,
+            read])
+            cnt += 1
+            print(cnt)
+    except:
+        text = colored("Looks like something went wrong.", "red")
+        print(text)
+        sys.exit(1)
+else:
+    pass
+
+input(colored("All finished! You are ready to proceed with further analysis and visualization in RStudio.", 'green', 'on_white'))
