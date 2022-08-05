@@ -1,4 +1,4 @@
-# Sleuth Analysis of Kallisto Data
+# Sleuth Analysis of Kallisto Output
 # Created: 29 September 2017
 # Last Edited: 5 August 2022
 # Jared Brewer
@@ -17,12 +17,9 @@ install.packages("devtools")
 devtools::install_github("pachterlab/sleuth")
 library(sleuth)
 
-install.packages("tidyverse")
 library(tidyverse)
-
-source("http://bioconductor.org/biocLite.R")
-BiocManager::install("biomaRt")
 library(biomaRt)
+library(pheatmap)
 
 # This analysis was optimized for animals - biomaRt access to bacterial genomes has been discontinued and is a mess.
 mart <- read_tsv("./Mycobacterium_tuberculosis_H37Rv_txt_v6.txt")
@@ -55,6 +52,15 @@ sleuth_live(so)
 
 de <- subset(sleuth_table, pval < 0.05)
 paths <- enrichPathway(gene = trimws(de$entrez), pvalueCutoff = 0.2, readable = T, organism = "Mycobacterium_tuberculosis_h37rv")
+
+tpm.mat <- sleuth_to_matrix(so, which_df = "obs_raw", which_units = "tpm")
+tpm <- as.data.frame(tpm.mat)
+
+setDT(tpm, keep.rownames = "genes")
+esx <- tpm %>% filter(endsWith(genes, "_5"))
+esx <- esx %>% column_to_rownames(var = "genes")
+write.csv(x = tpm.mat, file = "tpm_matrix.csv")
+pheatmap(esx, show_colnames = F, annotation_legend = T, filename = "rnaseq_heatmap_070622.png", width = 6, height = 2)
 
 
 # for (file in file_names) {
