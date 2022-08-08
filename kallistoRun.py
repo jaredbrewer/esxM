@@ -34,7 +34,8 @@ except PermissionError:
     sys.exit(1)
 
 # Define some potentially useful variables that I can plug into subprocess.
-kallisto = '/Users/molliesweeney/Downloads/kallisto-0.48.0/kallisto/build/src/kallisto'
+# A version of Kallisto built with HDF5 is essential - I am a little bit lost on why they stopped bundling HDF5 with newer version with no bootstrapping replacement. A version of Kallisto with HDF5 for macOS is included, but this is not a sustainable distribution method.
+kallisto = './kallisto'
 index = 'index'
 quant = 'quant'
 
