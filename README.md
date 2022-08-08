@@ -8,7 +8,14 @@ Parse a freshly downloaded gene list from [Mycobrowser](https://mycobrowser.epfl
 >Rv1792|esxM|CDS|2030347-2030643|+|ESAT-6 like protein EsxM
 ```
 
-This script will parse all the genes into a Python dictionary, replace esxM, esxJ, esxW, esxK, and esxP with their respective 5' UTR sequences (which facilitiates differentiation of these highly similar genes) and then write it out into a new fasta file, which is then used to generate the index file in Kallisto.
+This script will parse all the genes into a Python dictionary, replace esxM, esxJ, esxW, esxK, and esxP with their respective 5' UTR sequences (which facilitiates differentiation of these highly similar genes) and then write it out into a new fasta file, which is then used to generate the index file in Kallisto. It can be run piecewise in a Python terminal or accessed directly from the terminal by:
+
+```
+chmod +x cdnaParser.py
+./cdnaParser.py parser [reference cDNA file location] [replacement esx sequence location]
+```
+
+Small modifications could be make to accept any gene list, but this was not required for the current project. Optimally, the reference and replacement sequence files are all in the same directory as the script itself as this is where the output will go.
 
 Kallisto can be run manually from the command line or from the kallistoRun.py script. This script serves as a wrapper to automate both populating needed information in Kallisto and then looping over all of the files. The reads for this experiment were single-end, but the script should properly support paired-end reads as well. The output will be a series of folders with abundance.tsv files in them that are then ready for processing in R.
 
