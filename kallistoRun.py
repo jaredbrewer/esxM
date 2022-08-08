@@ -39,31 +39,18 @@ kallisto = './kallisto'
 index = 'index'
 quant = 'quant'
 
-# Fetch the index file (name independent, it just needs to end in the pattern defined above)
-# All Ensembl cDNA files should have that precise formatting.
-
-pattern = '*.cdna.all.fa.gz'
-ref_cdna = 'ref_cdna.fa.gz'
-exts = ('*.fastq.gz', '*.fq.gz')
-
-ref_cdna = glob.glob(pattern)
-ref_cdna = ref_cdna[0]
-
-# The rest of this is somewhat specific to paired-end sequencing... I could go back and redo for single-end? Probably wrap in 'if', 'try' statements.
-# Find the first of the pair of FASTQ files in the directory.
-fastqs = glob.glob("*_1.fastq.gz")
-SER = glob.glob("*.f*q.gz")
-
 # This checks whether you already have an index and, if so, whether you want to build a new one.
 index_checker = os.path.isfile('kallisto_index')
 
 if index_checker:
     indexed = input(colored("Would you like to build a fresh transcriptome index? This is optional [Y/N] ", 'green'))
-    if indexed == "Y":
+    if indexed is "Y":
+        ref_cdna = input(colored("Provide a path to the reference cDNA for your organism", "green"))
         subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
     else:
         pass
 else:
+    ref_cdna = input(colored("Provide a path to the reference cDNA for your organism", "green"))
     subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
 
 while True:
@@ -76,14 +63,17 @@ while True:
     else:
         break
 
-cnt = 0
 # This script runs for PE reads - it can estimate fragment length from this and doesn't need you to provide the information.
 
-if 'PE' in read_type:
+cnt = 0
+
+if 'PE' in read_type.upper():
+    fastqs = glob.glob("./*_1.f*q.gz")
     try:
         for forward in fastqs:
-            reverse = forward.replace("_1.fastq.gz", "_2.fastq.gz")
-            dir = forward.replace("_1.fastq.gz", "")
+            reverse = forward.replace("_1.f", "_2.f")
+            matcher = re.search("_1.f.*q.gz", forward).group(0)
+            dir = forward.replace(matcher, "")
             subprocess.call([kallisto, quant,
             '-i', 'kallisto_index',
             '-o', dir + '_quant',
@@ -102,18 +92,22 @@ else:
 
 # This needs a little bit more user-engagement - average fragment length and the SD are required, but can be substituted by guesses if it is not known (it rarely is).
 
-if 'SE' in read_type:
+cnt = 0
+
+if 'SE' in read_type.upper():
+    fastqs = glob.glob("./*.f*q.gz")
     frag_len = 250
     standard_dev = 35
-    frags = input("If known, input estimated average fragment length. If not known, hit enter: ")
+    frags = input("If known, input estimated average fragment length (from FastQC). If not known, hit enter: ")
     if not frags:
         frags = frag_len
-    sd = input("If known, input the standard deviation of the fragment length. If not known, hit enter: ")
+    sd = input("If known, input the standard deviation of the fragment length (from FastQC). If not known, hit enter: ")
     if not standard_dev:
         sd = standard_dev
     try:
-        for read in SER:
-            dir = read.replace(".f*q.gz", "")
+        for read in fastqs:
+            matcher = re.search(".f.*q.gz", read).group(0)
+            dir = read.replace(matcher, "")
             subprocess.call([kallisto, quant,
             '-i', 'kallisto_index',
             '-o', dir + '_quant',

@@ -19,6 +19,7 @@ library(sleuth)
 
 library(tidyverse)
 library(biomaRt)
+library(data.table)
 library(pheatmap)
 
 # This analysis was optimized for animals - biomaRt access to bacterial genomes has been discontinued and is a mess.
@@ -56,11 +57,19 @@ paths <- enrichPathway(gene = trimws(de$entrez), pvalueCutoff = 0.2, readable = 
 tpm.mat <- sleuth_to_matrix(so, which_df = "obs_raw", which_units = "tpm")
 tpm <- as.data.frame(tpm.mat)
 
+# Read straight from Sleuth matrix: 
 setDT(tpm, keep.rownames = "genes")
 esx <- tpm |> filter(endsWith(genes, "_5")) |> column_to_rownames(var = "genes")
 write.csv(x = tpm.mat, file = "tpm_matrix.csv")
 pheatmap(esx, show_colnames = F, annotation_legend = T, filename = "rnaseq_heatmap_070622.png", width = 6, height = 2)
 
+# Read from saved .csv file: 
+esx <- read.csv("./counts_tpm.csv", header = T)
+row.names(esx) <- esx$target_id
+esx <- esx |> filter(endsWith(target_id, "_5"))
+esx <- esx[-c(1:2)]
+esx <- as.matrix(esx)
+pheatmap(esx, show_colnames = F, annotation_legend = T, filename = "rnaseq_heatmap_070622.png", width = 6, height = 2)
 
 # for (file in file_names) {
 #   ab <- read_tsv(file)
