@@ -15,7 +15,7 @@ os.chdir(script_path)
 # If they are not, then it executes a script to install them, may require user password.
 if not shutil.which('xcode-select'):
     if not shutil.which('brew'):
-        if not shutil.which('kallisto'):
+        if not shutil.which('./kallisto'):
             subprocess.call(['./brew_installer.sh'])
 
 from termcolor import colored, cprint
