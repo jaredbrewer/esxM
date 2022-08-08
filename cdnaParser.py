@@ -10,5 +10,5 @@ for f in SimpleFastaParser(fasta):
 	fastas[name] = seq
 
 with open('/Users/jared/Downloads/Mtb_H37Rv.fa', 'w') as cdna:
-	for seq in fastas:
-		cdna.write(seq + "\n" + fastas[seq] + "\n")
+	for gene, seq in fastas.items():
+		cdna.write(gene + "\n" + seq + "\n")

@@ -57,8 +57,7 @@ tpm.mat <- sleuth_to_matrix(so, which_df = "obs_raw", which_units = "tpm")
 tpm <- as.data.frame(tpm.mat)
 
 setDT(tpm, keep.rownames = "genes")
-esx <- tpm %>% filter(endsWith(genes, "_5"))
-esx <- esx %>% column_to_rownames(var = "genes")
+esx <- tpm |> filter(endsWith(genes, "_5")) |> column_to_rownames(var = "genes")
 write.csv(x = tpm.mat, file = "tpm_matrix.csv")
 pheatmap(esx, show_colnames = F, annotation_legend = T, filename = "rnaseq_heatmap_070622.png", width = 6, height = 2)
 
