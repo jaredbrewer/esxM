@@ -44,14 +44,15 @@ index_checker = os.path.isfile('kallisto_index')
 
 if index_checker:
     indexed = input(colored("Would you like to build a fresh transcriptome index? This is optional [Y/N] ", 'green'))
-    if indexed is "Y":
-        ref_cdna = input(colored("Provide a path to the reference cDNA for your organism", "green"))
-        subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
+    if indexed == "Y":
+        ref_cdna = input(colored("Provide a path to the reference cDNA for your organism: ", "green")).rstrip()
+        # This defies logic - why does the drag-and-drop add a space? I guess no harm in stripping either way, but so weird as far as a source of error.
+        subprocess.run([kallisto, index, '-i', 'kallisto_index', ref_cdna])
     else:
         pass
 else:
-    ref_cdna = input(colored("Provide a path to the reference cDNA for your organism", "green"))
-    subprocess.call([kallisto, index, '-i', 'kallisto_index', ref_cdna])
+    ref_cdna = input(colored("Provide a path to the reference cDNA for your organism: ", "green")).rstrip()
+    subprocess.run([kallisto, index, '-i', 'kallisto_index', ref_cdna])
 
 while True:
     valid = ('pe', 'se')
@@ -74,7 +75,7 @@ if 'PE' in read_type.upper():
             reverse = forward.replace("_1.f", "_2.f")
             matcher = re.search("_1.f.*q.gz", forward).group(0)
             dir = forward.replace(matcher, "")
-            subprocess.call([kallisto, quant,
+            subprocess.run([kallisto, quant,
             '-i', 'kallisto_index',
             '-o', dir + '_quant',
             '--bias',
@@ -108,7 +109,7 @@ if 'SE' in read_type.upper():
         for read in fastqs:
             matcher = re.search(".f.*q.gz", read).group(0)
             dir = read.replace(matcher, "")
-            subprocess.call([kallisto, quant,
+            subprocess.run([kallisto, quant,
             '-i', 'kallisto_index',
             '-o', dir + '_quant',
             '--bias',
