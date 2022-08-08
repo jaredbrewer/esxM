@@ -9,7 +9,7 @@
 # After running, you'll get an interactive window where you can play with your data and look for effects.
 # There is merit in breaking out comparisons if you have a bunch of conditions...
 
-setwd("/Users/molliesweeney/Desktop/RNA_seq/NCG_H37Rv_RNAseq")
+setwd("~/esxM")
 
 source("http://bioconductor.org/biocLite.R")
 BiocManager::install("rhdf5")
@@ -21,9 +21,10 @@ library(tidyverse)
 library(biomaRt)
 library(data.table)
 library(pheatmap)
+library(tidyr)
 
 # This analysis was optimized for animals - biomaRt access to bacterial genomes has been discontinued and is a mess.
-mart <- read_tsv("./Mycobacterium_tuberculosis_H37Rv_txt_v6.txt")
+mart <- read_tsv("./gene_list.txt")
 t2g <- as.data.frame(mart$Name)
 names(t2g)[1] <- "target_id"
 t2g.2 <- t2g[!duplicated(t2g$target_id),]
@@ -60,11 +61,12 @@ tpm <- as.data.frame(tpm.mat)
 # Read straight from Sleuth matrix: 
 setDT(tpm, keep.rownames = "genes")
 esx <- tpm |> filter(endsWith(genes, "_5")) |> column_to_rownames(var = "genes")
-write.csv(x = tpm.mat, file = "tpm_matrix.csv")
+esx <- as.matrix(esx)
+write.csv(x = tpm.mat, file = "esx_5_tpm.csv")
 pheatmap(esx, show_colnames = F, annotation_legend = T, filename = "rnaseq_heatmap_070622.png", width = 6, height = 2)
 
-# Read from saved .csv file: 
-esx <- read.csv("./counts_tpm.csv", header = T)
+# Read from saved .csv file (this is the method used for the actual figure): 
+esx <- read.csv("./esx_5_tpm.csv", header = T)
 row.names(esx) <- esx$target_id
 esx <- esx |> filter(endsWith(target_id, "_5"))
 esx <- esx[-c(1:2)]
