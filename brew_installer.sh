@@ -1,15 +1,14 @@
 #!/bin/sh
 
-# This will ONLY work on Macs - macOS Mojave (10.14) or High Sierra (10.13) preferred, untested on other versions.
+# This will ONLY work on macOS - High Sierra (10.13) or newer likely work, tested on macOS Monterey (12.5).
 
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew tap homebrew/science
-brew install kallisto
 brew install python@3.10
-brew install --cask R
-brew install --cask rstudio
-brew install rpy2
-pip3 install BioPython
+# brew install --cask R
+# brew install --cask rstudio
+# brew install rpy2
+# pip3 install BioPython
 pip3 install termcolor
