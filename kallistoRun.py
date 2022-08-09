@@ -97,8 +97,8 @@ cnt = 0
 
 if 'SE' in read_type.upper():
     fastqs = glob.glob("./*.f*q.gz")
-    frag_len = 250
-    standard_dev = 35
+    frag_len = 150
+    standard_dev = 10
     frags = input("If known, input estimated average fragment length (from FastQC). If not known, hit enter: ")
     if not frags:
         frags = frag_len
