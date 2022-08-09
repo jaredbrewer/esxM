@@ -1,0 +1,3 @@
+[submodule "image-analysis"]
+	path = image-analysis
+	url = https://github.com/jaredbrewer/image-analysis.git
