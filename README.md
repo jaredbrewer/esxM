@@ -1,4 +1,6 @@
-# RNA-seq Analysis for NCG vs H37Rv (in re: Saelans, Sweeney, Viswanathan, et al. 2022)
+# RNA-seq Analysis for NCG vs H37Rv and Image Analysis for BLaER1 Cells (in re: Saelans, Sweeney, Viswanathan, et al. 2022)
+
+## RNA-seq Pipeline
 
 This contains the scripts and other files needed to analyze the RNA sequencing files contained in (). The general pipeline is as follows:
 
