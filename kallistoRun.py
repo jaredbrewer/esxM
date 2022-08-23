@@ -22,7 +22,9 @@ elif "x86_64" in platform.platform():
 # If they are not, then it executes a script to install them, may require user password.
 if not shutil.which('xcode-select'):
     if not shutil.which('brew'):
-        subprocess.call(['./brew_installer.sh'])
+        subprocess.run(['./brew_installer.sh'])
+    else:
+        subprocess.run(["brew", "install", "hdf5"])
 
 from termcolor import colored, cprint
 import Bio
