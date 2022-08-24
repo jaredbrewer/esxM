@@ -27,7 +27,14 @@ Small modifications could be make to accept any gene list, but this was not requ
 
 [Kallisto](https://github.com/pachterlab/kallisto) 0.48 was built on a 2017 5K iMac running macOS Monterey 12.5 with a modified CMakeList.txt requiring inclusion of HDF5 support (```option(USE_HDF5 "Compile with HDF5 support" OFF)``` to ```option(USE_HDF5 "Compile with HDF5 support" ON)```). This is the latest version of Kallisto available at time of writing and standard versions of Kallisto are unable to perform bootstrapping for Sleuth quantification due to removal of this HDF5 dependency. Additional binaries compatible with Apple Silicon Macs (built on a 14" M1 Max MacBook Pro) and Linux (Ubuntu on WSL, Windows 10 Enterprise on a Dell Precision 7920) are also provided. The underlying rationale for this change is unclear, but the provided binary should work for others. These Kallisto binaries are provided under the same license terms as the source (BSD 2-Clause "Simplified" License, found [here](https://opensource.org/licenses/BSD-2-Clause), Copyright (c) 2017, Nicolas Bray, Harold Pimentel, Páll Melsted and Lior Pachter).
 
-Kallisto can be run manually from the command line or from the kallistoRun.py script. This script serves as a wrapper to automate both populating needed information in Kallisto and then looping over all of the files. The reads for this experiment were single-end, but the script should properly support paired-end reads as well. The output will be a series of folders with abundance.tsv files in them that are then ready for processing in R.
+Kallisto can be run manually from the command line or from the __kallistoRun.py__ script.
+
+```
+chmod +x kallistoRun.py
+./kallistoRun.py
+```
+
+This script serves as a wrapper to automate both populating needed information in Kallisto and then looping over all of the files. The reads for this experiment were single-end, but the script should properly support paired-end reads as well. The output will be a series of folders with abundance.tsv files in them that are then ready for processing in R.
 
 For their own reasons, Ensembl has discontinued the production of biomaRt entities for bacterial genomes due to the immense number of bacterial genome sequences available. This introduces a new challenge for the analysis of bacterial RNA-seq data. Specifically for mycobacteria, we can use the TSVs provided with each release on Mycobrowser to construct a simplified mart-like object that can be use for Sleuth. This is an imperfect option (as it is somewhat more manual and organism-specific) but is more than adequately serviceable for the time being.
 
